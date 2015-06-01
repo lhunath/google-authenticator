@@ -29,7 +29,7 @@ DEF_LDFLAGS := $(shell [ `uname` = SunOS ] && echo ' -mimpure-text') $(LDFLAGS)
 LDL_LDFLAGS := $(shell $(CC) -shared -ldl -xc -o /dev/null /dev/null          \
                        >/dev/null 2>&1 && echo ' -ldl')
 
-all: google-authenticator pam_google_authenticator.so demo                    \
+all: google-authenticator google_authenticator_gen.o pam_google_authenticator.so demo                    \
      pam_google_authenticator_unittest
 
 test: pam_google_authenticator_unittest
@@ -69,7 +69,7 @@ clean:
 	               pam_google_authenticator_unittest                      \
 	               libpam-google-authenticator-*-source.tar.bz2
 
-google-authenticator: google-authenticator.o base32.o hmac.o sha1.o
+google-authenticator: google-authenticator.o google_authenticator_gen.o base32.o hmac.o sha1.o
 	$(CC) -g $(DEF_LDFLAGS) -o $@ $+ $(LDL_LDFLAGS)
 
 demo: demo.o pam_google_authenticator_demo.o base32.o hmac.o sha1.o
@@ -93,7 +93,8 @@ pam_google_authenticator_testing.o: pam_google_authenticator.c base32.h       \
 pam_google_authenticator_unittest.o: pam_google_authenticator_unittest.c      \
                                      pam_google_authenticator_testing.so      \
                                      base32.h hmac.h sha1.h
-google-authenticator.o: google-authenticator.c base32.h hmac.h sha1.h
+google_authenticator_gen.o: google_authenticator_gen.c base32.h hmac.h sha1.h
+google-authenticator.o: google-authenticator.c google_authenticator_gen.o base32.h hmac.h sha1.h
 demo.o: demo.c base32.h hmac.h sha1.h
 base32.o: base32.c base32.h
 hmac.o: hmac.c hmac.h sha1.h
